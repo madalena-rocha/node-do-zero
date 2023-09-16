@@ -3,20 +3,48 @@ import { DatabaseMemory } from './database-memory.js'
 
 const server = fastify()
 
-server.post('/videos', () => {
-  return 'Hello World'
+const database = new DatabaseMemory()
+
+server.post('/videos', (request, reply) => {
+  const { title, description, duration } = request.body
+
+  database.create({
+    title,
+    description,
+    duration,
+  })
+
+  return reply.status(201).send()
 })
 
-server.get('/videos', () => {
-  return 'Hello Rocketseat'
+server.get('/videos', (request) => {
+  const search = request.query.search
+
+  const videos = database.list(search)
+  
+  return videos
 })
 
-server.put('/videos/:id', () => {
-  return 'Hello Node.js'
+server.put('/videos/:id', (request, reply) => {
+  const videoId = request.params.id
+  const { title, description, duration } = request.body
+
+  database.update(videoId, {
+    title,
+    description,
+    duration,
+  })
+
+  return reply.status(204).send()
+  // 204 significa uma resposta que teve sucesso, mas não tem conteúdo na resposta
 })
 
-server.delete('/videos/:id', () => {
-  return 'Hello Node.js'
+server.delete('/videos/:id', (request, reply) => {
+  const videoId = request.params.id
+
+  database.delete(videoId)
+
+  return reply.status(204).send()
 })
 
 server.listen({
